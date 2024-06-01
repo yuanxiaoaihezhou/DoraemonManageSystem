@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Tools{% endblock %}
+
+{% block content %}
+    <h2>道具</h2>
+    {% if is_admin %}
+        <button onclick="location.href = '{{ url_for('new_tool') }}'">新增道具</button>
+    {% endif %}
+    <div id="tools-container" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;">
+        {% for tool in tools %}
+            <div class="tool">
+                <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}" style="width: 100%; height: auto; object-fit: cover;">
+                <a href="{{ url_for('tool_details', tool_id=tool.ToolID) }}">{{ tool.ToolName }}</a>
+            </div>
+        {% endfor %}
+    </div>
+    <button id="load-more" onclick="loadMore()" style="display: block; margin: 0 auto; padding: 1rem 2rem;">加载更多</button>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let pageNum = 2;
+        const loadMore = async () => {
+            const response = await fetch(`/tools?page=${pageNum}`);
+            const text = await response.text();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            const newTools = tempDiv.querySelector('#tools-container').children;  // get tools from new page
+            const toolsContainer = document.querySelector('#tools-container');
+            Array.from(newTools).forEach(tool => toolsContainer.append(tool));  // add new tools to existing tools
+            pageNum += 1;
+            if (newTools.length < 35) {  // if less than maximum number of tools per page, hide Load More button
+                document.querySelector('#load-more').style.display = 'none';
+            }
+        }
+    </script>
+{% endblock %}

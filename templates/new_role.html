@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>新增角色</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="password"], select {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        #verificationCode {
+            display: none;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>新增角色</h2>
+        <form method="post" enctype="multipart/form-data">
+            <label for="file">角色图片上传</label>
+            <input type="file" name="file" id="file">
+            <label for="role_name">角色名:</label>
+            <input type="text" id="role_name" name="role_name" required>
+            <label for="gender">性别:</label>
+            <select id="gender" name="gender" required>
+                <option value="male">男</option>
+                <option value="female">女</option>
+                <option value="other">其他</option>
+            </select>
+            <label for="role_age">年龄:</label>
+            <input type="text" id="role_age" name="role_age" required>
+            <label for="role_profile">角色简介:</label>
+            <textarea id="role_profile" name="role_profile" maxlength="400" required placeholder="输入角色简介，不超过400字"></textarea>
+            <input type="submit" value="注册">
+        </form>
+    </div>
+</body>
+</html>

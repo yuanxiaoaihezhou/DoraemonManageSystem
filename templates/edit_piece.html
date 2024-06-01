@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">编辑作品信息</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="piece_name" class="form-label">作品名称:</label>
+            <input type="text" class="form-control" name="piece_name" id="piece_name" value="{{ piece.PieceName }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="piece_profile" class="form-label">作品简介:</label>
+            <textarea class="form-control" name="piece_profile" id="piece_profile" rows="3" required>{{ piece.PieceProfile }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="piece_link" class="form-label">作品链接:</label>
+            <textarea class="form-control" name="piece_link" id="piece_link" rows="3" required>{{ piece.PieceProfile }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="piece_type" class="form-label">作品类型:</label>
+            <select class="form-select" name="piece_type" id="piece_type" required>
+                <option value="漫画" {% if piece.PieceType == '漫画' %}selected{% endif %}>漫画</option>
+                <option value="动漫" {% if piece.PieceType == '动漫' %}selected{% endif %}>动漫</option>
+                <option value="小说" {% if piece.PieceType == '小说' %}selected{% endif %}>小说</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="piece_author" class="form-label">作者:</label>
+            <input type="text" class="form-control" name="piece_author" id="piece_author" value="{{ piece.PieceAuthor }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="piece_os" class="form-label">是否是原作:</label>
+            <select class="form-select" name="piece_os" id="piece_os" required>
+                <option value="True" {% if piece.PieceOS %}selected{% endif %}>是</option>
+                <option value="False" {% if not piece.PieceOS %}selected{% endif %}>否</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="file" class="form-label">作品图片:</label>
+            <input type="file" class="form-control" name="file" id="file" onchange="previewImage(event)">
+            <div class="mt-3">
+                <p>当前图片:</p>
+                <img src="{{ url_for('static', filename=piece.PiecePic) }}" alt="当前图片" class="img-thumbnail" id="currentImage" style="width: 60%; height: auto; object-fit: cover;">
+            </div>
+            <div class="mt-3">
+                <p>新上传图片预览:</p>
+                <img id="newImagePreview" class="img-thumbnail" style="width: 60%; height: auto; object-fit: cover;">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">提交</button>
+    </form>
+</div>
+
+<script>
+    // JavaScript 函数用于在选择文件后预览图片
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById('newImagePreview');
+            output.src = reader.result;
+            output.style.display = 'block'; // 显示新上传图片预览
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+{% endblock %}

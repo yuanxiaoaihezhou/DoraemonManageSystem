@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ role.RoleName }}</h1>
+    <img src="{{ url_for('static', filename=role.RolePic) }}" alt="{{ role.RoleName }}" style="width: 60%; height: auto; object-fit: cover;">
+    <p>角色简介: {{ role.RoleProfile }}</p>
+    <p>性别:
+        {% if role.RoleGender == True %}
+            男
+        {% elif role.RoleGender == False %}
+            女
+        {% else %}
+            其他
+        {% endif %}
+    </p>
+    <p>年龄: {{ role.RoleAge }}</p>
+    {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_role', role_id=role.RoleID) }}" class="btn btn-primary">编辑</a>
+        <form action="{{ url_for('delete_role', role_id=role.RoleID) }}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个角色吗？')">删除</button>
+    {% endif %}
+    <!-- 添加更多角色属性的展示 -->
+{% endblock %}

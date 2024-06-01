@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        .piece-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .piece-actions {
+            display: flex;
+            align-items: center;
+        }
+        .piece-title {
+            margin-right: 20px; /* 根据需要调整 */
+        }
+        .favorite-form, .delete-form, .edit-form {
+            margin: 0 10px 0 0; /* 移除表单的默认外边距并添加右边距 */
+        }
+    </style>
+    <div class="piece-header">
+        <h1 class="piece-title">{{ piece.PieceName }}</h1>
+        <div class="piece-actions">
+            <form action="{{ url_for('add_to_favorites', piece_id=piece.PieceID) }}" method="post" class="favorite-form">
+                <button type="submit" class="btn btn-success">收藏</button>
+            </form>
+            {% if current_user.is_admin %}
+                <form action="{{ url_for('edit_piece', piece_id=piece.PieceID) }}" method="get" class="edit-form">
+                    <button type="submit" class="btn btn-primary">编辑</button>
+                </form>
+                <form action="{{ url_for('delete_piece', piece_id=piece.PieceID) }}" method="post" class="delete-form">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个作品吗？')">删除</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <img src="{{ url_for('static', filename=piece.PiecePic) }}" alt="{{ piece.PieceName }}" style="width: 60%; height: auto; object-fit: cover;">
+    <p>作品简介: {{ piece.PieceProfile }}</p>
+    <p>作品类型: {{ piece.PieceType }}</p>
+    <p>作品作者: {{ piece.PieceAuthor }}</p>
+    <p>作品链接: <a href="{{ piece.PieceLink }}" target="_blank">{{ piece.PieceName }}</a></p>
+    <p>作品创作类型:
+        {% if piece.PieceOS %}
+            原作
+        {% else %}
+            二创
+        {% endif %}
+    </p>
+
+    <!-- 显示关联的角色 -->
+    <h3>关联的角色</h3>
+    <ul>
+        {% for role in roles %}
+            <li>
+                <img src="{{ url_for('static', filename=role.RolePic) }}" alt="{{ role.RoleName }}" style="width: 50px; height: auto; object-fit: cover;">
+                <a href="{{ url_for('role_details', role_id=role.RoleID) }}">{{ role.RoleName }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- 显示关联的道具 -->
+    <h3>关联的道具</h3>
+    <ul>
+        {% for tool in tools %}
+            <li>
+                <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}" style="width: 50px; height: auto; object-fit: cover;">
+                <a href="{{ url_for('tool_details', tool_id=tool.ToolID) }}">{{ tool.ToolName }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

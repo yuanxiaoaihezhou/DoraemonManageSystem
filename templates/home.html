@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}主页{% endblock %}
+
+{% block content %}
+<style>
+    .flex-container {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none; /* 去掉小黑点 */
+        justify-content: space-between;
+        gap: 10px; /* 调整间距 */
+    }
+
+    .flex-item {
+        flex: 1 1 calc(20% - 10px); /* 5个项目，每个占20%的宽度，减去间距 */
+        box-sizing: border-box;
+        max-width: 40%; /* 限制最大显示比例为60% */
+    }
+
+    .flex-item img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .flex-item a {
+        display: block;
+        text-align: center;
+        margin-top: 5px;
+    }
+</style>
+
+<section>
+    <h2>最新作品</h2>
+    <ul class="flex-container">
+        {% for piece in latest_pieces %}
+            <li class="flex-item">
+                <img src="{{ url_for('static', filename=piece.PiecePic) }}" alt="{{ piece.PieceName }}">
+                <a href="{{ url_for('piece_details', piece_id=piece.PieceID) }}">{{ piece.PieceName }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <h2>最新角色</h2>
+    <ul class="flex-container">
+        {% for role in latest_roles %}
+            <li class="flex-item">
+                <img src="{{ url_for('static', filename=role.RolePic) }}" alt="{{ role.RoleName }}">
+                <a href="{{ url_for('role_details', role_id=role.RoleID) }}">{{ role.RoleName }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <h2>最新道具</h2>
+    <ul class="flex-container">
+        {% for tool in latest_tools %}
+            <li class="flex-item">
+                <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}">
+                <a href="{{ url_for('tool_details', tool_id=tool.ToolID) }}">{{ tool.ToolName }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <h2>最新发言</h2>
+    <ul>
+        {% for remark in latest_remarks %}
+            <li>{{ remark.RemarkContent }}</li>
+        {% endfor %}
+    </ul>
+    <!-- 其他section同理添加 -->
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">编辑道具信息</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="tool_name" class="form-label">道具名称:</label>
+            <input type="text" class="form-control" name="tool_name" id="tool_name" value="{{ tool.ToolName }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="role_profile" class="form-label">道具简介:</label>
+            <textarea class="form-control" name="tool_profile" id="tool_profile" rows="3" required>{{ tool.ToolProfile }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="file" class="form-label">道具图片:</label>
+            <input type="file" class="form-control" name="file" id="file" onchange="previewImage(event)">
+            <div class="mt-3">
+                <p>当前图片:</p>
+                <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="当前图片" class="img-thumbnail" id="currentImage" style="width: 60%; height: auto; object-fit: cover;">
+            </div>
+            <div class="mt-3">
+                <p>新上传图片预览:</p>
+                <img id="newImagePreview" class="img-thumbnail" style="width: 60%; height: auto; object-fit: cover;">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">提交</button>
+    </form>
+</div>
+
+<script>
+    // JavaScript 函数用于在选择文件后预览图片
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById('newImagePreview');
+            output.src = reader.result;
+            output.style.display = 'block'; // 显示新上传图片预览
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .forum {
+        border: 2px solid #000; /* 黑色边框 */
+        border-radius: 20px; /* 设置边框圆角的曲率，使四个角变得圆滑 */
+        padding: 20px; /* 内边距，使内容与边框有些距离 */
+        margin: 10px 0; /* 外边距，使不同的 remark 之间有些间隔 */
+        text-align: left; /* 文本左对齐 */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 可选：添加一些阴影效果，让边框更有层次感 */
+        background-color: #f9f9f9; /* 可选：设置背景颜色 */
+    }
+</style>
+<h1>论坛列表</h1>
+<div class="forums">
+    {% for forum in forums %}
+    <div class="forum">
+        <h2>{{ forum.forum_name }}</h2>
+        {% for remark in forum.latest_remarks %}
+        <p style="margin-left: 20px;">{{ remark.username }}：{{ remark.remark_content }}</p>
+        {% endfor %}
+        <a href="/forum/{{ forum.forum_id }}">read more</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

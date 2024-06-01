@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .remark {
+        border: 2px solid #000; /* 黑色边框 */
+        border-radius: 20px; /* 设置边框圆角的曲率，使四个角变得圆滑 */
+        padding: 20px; /* 内边距，使内容与边框有些距离 */
+        margin: 10px 0; /* 外边距，使不同的 remark 之间有些间隔 */
+        text-align: left; /* 文本左对齐 */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 可选：添加一些阴影效果，让边框更有层次感 */
+        background-color: #f9f9f9; /* 可选：设置背景颜色 */
+    }
+    /* 文本输入框样式 */
+    textarea {
+        width: 100%; /* 输入框宽度调整为100%，使其填满容器宽度 */
+        padding: 10px; /* 内边距 */
+        margin-bottom: 10px; /* 底部外边距 */
+        border: 2px solid #ccc; /* 边框颜色 */
+        border-radius: 10px; /* 圆角 */
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* 内部阴影 */
+        resize: vertical; /* 允许垂直调整大小 */
+    }
+    /* 提交按钮样式 */
+    input[type=submit] {
+        padding: 10px 20px; /* 内边距 */
+        background-color: #007bff; /* 背景颜色 */
+        color: #fff; /* 文字颜色 */
+        border: none; /* 无边框 */
+        border-radius: 5px; /* 圆角 */
+        cursor: pointer; /* 鼠标悬停时为指针形状 */
+        transition: background-color 0.3s ease; /* 背景颜色变化的过渡效果 */
+    }
+
+    /* 提交按钮鼠标悬停效果 */
+    input[type=submit]:hover {
+        background-color: #0056b3; /* 鼠标悬停时的背景颜色 */
+    }
+</style>
+<div class="forum-details">
+    <h1>{{ forum.ForumName }}</h1>
+    <p>{{ forum.ForumProfile }}</p>
+    <h2>帖子</h2>
+    <div class="remarks">
+        {% for remark in remarks %}
+        <div class="remark">
+            <p><strong>{{ remark.username }}</strong></p>
+            <p>{{ remark.remark_content }}</p>
+            <p><small>时间：{{ remark.remark_time }}</small></p>
+        </div>
+        {% else %}
+        <p>此论坛暂无帖子。</p>
+        {% endfor %}
+    </div>
+    <h2>评论</h2>
+    <form action="{{ url_for('forum_details', forum_id=forum.ForumID) }}" method="post">
+        <textarea name="remark_content" placeholder="Type your remark here..." required></textarea>
+        <input type="submit" value="Submit">
+    </form>
+</div>
+{% endblock %}

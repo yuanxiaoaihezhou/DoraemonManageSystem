@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}收藏{% endblock %}
+
+{% block content %}
+    <h2>我的收藏</h2>
+    <div id="favorites-container" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;">
+        {% for favorite in favorites %}
+            <div class="favorite">
+                <img src="{{ url_for('static', filename=favorite.piece_pic) }}" alt="{{ favorite.piece_name }}" style="width: 100%; height: auto; object-fit: cover;">
+                <a href="{{ url_for('piece_details', piece_id=favorite.piece_id) }}">{{ favorite.piece_name }}</a>
+                <form action="{{ url_for('remove_from_favorites', piece_id=favorite.piece_id) }}" method="post">
+                    <button type="submit">取消收藏</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+    <button id="load-more" onclick="loadMore()" style="display: block; margin: 0 auto; padding: 1rem 2rem;">加载更多</button>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let pageNum = 2;
+        const loadMore = async () => {
+            const response = await fetch(`/favorites?page=${pageNum}`);
+            const text = await response.text();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            const newFavorites = tempDiv.querySelector('#favorites-container').children;
+            const favoritesContainer = document.querySelector('#favorites-container');
+            Array.from(newFavorites).forEach(favorite => favoritesContainer.append(favorite));
+            pageNum += 1;
+            if (newFavorites.length < 35) {
+                document.querySelector('#load-more').style.display = 'none';
+            }
+        }
+    </script>
+{% endblock %}

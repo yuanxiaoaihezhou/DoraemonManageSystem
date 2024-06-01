@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ tool.ToolName }}</h1>
+    <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}" style="width: 60%; height: auto; object-fit: cover;">
+    <p>道具简介: {{ tool.ToolProfile }}</p>
+    {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_tool', tool_id=tool.ToolID) }}" class="btn btn-primary">编辑</a>
+        <form action="{{ url_for('delete_tool', tool_id=tool.ToolID) }}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个道具吗？')">删除</button>
+    {% endif %}
+    <!-- 添加更多角色属性的展示 -->
+{% endblock %}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Remarks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Remarks</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Remark ID</th>
+                <th>Remark Content</th>
+                <th>Remark Time</th>
+                <th>Forum ID</th>
+                <th>Forum Name</th>
+                <th>User ID</th>
+                <th>User Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for remark in remarks %}
+            <tr>
+                <td>{{ remark.remark_id }}</td>
+                <td>{{ remark.remark_content }}</td>
+                <td>{{ remark.remark_time }}</td>
+                <td>{{ remark.forum_id }}</td>
+                <td>{{ remark.forum_name }}</td>
+                <td>{{ remark.user_id }}</td>
+                <td>{{ remark.user_name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
