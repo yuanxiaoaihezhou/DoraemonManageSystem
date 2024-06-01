@@ -885,7 +885,7 @@ def user_remarks():
         flash('You must be an admin to view this page.')
         return redirect(url_for('login'))
 
-    sql = text('SELECT * FROM user_remarks_view')
+    sql = text('SELECT * FROM `user_remarks_view`')
     result = db.session.execute(sql)
     remarks = result.fetchall()
 
@@ -901,6 +901,31 @@ def user_remarks():
     } for row in remarks]
 
     return render_template('admin.html', remarks=remarks_list)
+
+
+@app.route('/unlinked_roles/<int:piece_id>')
+def unlinked_roles(piece_id):
+    if 'user_id' not in session:
+        return jsonify([])
+
+    roles = Role.query.outerjoin(RoleLink, (Role.RoleID == RoleLink.RoleID) & (RoleLink.PieceID == piece_id))\
+                      .filter(RoleLink.PieceID == None).all()
+
+    roles_data = [{'RoleID': role.RoleID, 'RoleName': role.RoleName} for role in roles]
+    return jsonify(roles_data)
+
+
+@app.route('/unlinked_tools/<int:piece_id>')
+def unlinked_tools(piece_id):
+    if 'user_id' not in session:
+        return jsonify([])
+
+    tools = Tool.query.outerjoin(ToolLink, (Tool.ToolID == ToolLink.ToolID) & (ToolLink.PieceID == piece_id))\
+                      .filter(ToolLink.PieceID == None).all()
+
+    tools_data = [{'ToolID': tool.ToolID, 'ToolName': tool.ToolName} for tool in tools]
+    return jsonify(tools_data)
+
 
 if __name__ == "__main__":
     with app.app_context():
