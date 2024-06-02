@@ -46,7 +46,7 @@
         <div class="remark">
             <p><strong>{{ remark.username }}</strong></p>
             <p>{{ remark.remark_content }}</p>
-            <p><small>时间：{{ remark.remark_time }}</small></p>
+            <p><small class="utc-time">时间：{{ remark.remark_time }}</small></p>
         </div>
         {% else %}
         <p>此论坛暂无帖子。</p>
@@ -58,4 +58,19 @@
         <input type="submit" value="Submit">
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 获取所有带有 class 'utc-time' 的元素
+        var timeElements = document.querySelectorAll('.utc-time');
+
+        // 遍历每个元素，转换 UTC 时间为本地时间
+        timeElements.forEach(function(element) {
+            var utcTime = element.textContent.replace('时间：', '').trim();
+            var localTime = new Date(utcTime + ' UTC');
+            element.textContent = '时间：' + localTime.toLocaleString();
+        });
+    });
+</script>
+
 {% endblock %}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>删除道具关联</title>
+</head>
+<body>
+    <h1>删除道具关联</h1>
+    <form method="post">
+        <label for="piece_id">选择作品:</label>
+        <select id="piece_id" name="piece_id" onchange="this.form.submit()">
+            <option value="">-- 选择作品 --</option>
+            {% for piece in pieces %}
+            <option value="{{ piece.PieceID }}" {% if piece.PieceID == selected_piece_id|int %}selected{% endif %}>{{ piece.PieceName }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if tools %}
+    <form method="post">
+        <input type="hidden" name="piece_id" value="{{ selected_piece_id }}">
+        <label for="tool_id">选择道具:</label>
+        <select id="tool_id" name="tool_id">
+            {% for tool in tools %}
+            <option value="{{ tool.ToolID }}">{{ tool.ToolName }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">删除道具关联</button>
+    </form>
+    {% endif %}
+</body>
+</html>

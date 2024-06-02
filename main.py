@@ -141,7 +141,7 @@ def register():
             # 如果用户选择注册admin，则验证校验码
             if usertype == 'admin':
                 if verification_code != ADMIN_VERIFICATION_CODE:
-                    flash('Invalid verification code for admin registration.')
+                    flash('注册码校验错误')
                     return redirect(url_for('register'))
 
             if usertype == 'admin':
@@ -171,10 +171,10 @@ def register():
                     new_user.UserPic = file_path  # 注意这里保存的应是路径而非文件名
                     db.session.commit()
                 else:
-                    print("上传的文件缺少扩展名，请选择正确的图片文件")
+                    # print("上传的文件缺少扩展名，请选择正确的图片文件")
                     flash('上传的文件缺少扩展名，请选择正确的图片文件')
             else:
-                print("上传的文件类型无效或者没有选定文件")
+                # print("上传的文件类型无效或者没有选定文件")
                 flash('上传的文件类型无效或者没有选定文件')
 
             flash('注册成功，请登录。')
@@ -183,6 +183,7 @@ def register():
     except Exception as e:
         # 如果触发器抛出错误，回滚会话并显示错误消息
         print("用户名已存在，请重新输入")
+        print(e)
         db.session.rollback()
         flash("用户名已存在，请重新输入")
         return redirect(url_for('register'))
@@ -339,15 +340,13 @@ def new_piece():
 
 @app.route('/piece/edit/<int:piece_id>', methods=['GET', 'POST'])
 def edit_piece(piece_id):
-    # Ensure user is logged in and is an admin
     if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to edit a piece.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     piece = Piece.query.get_or_404(piece_id)
 
     if request.method == 'POST':
-        # Update piece object with data from form
         piece.PieceName = request.form['piece_name']
         piece.PieceType = request.form['piece_type']
         piece.PieceProfile = request.form['piece_profile']
@@ -358,7 +357,6 @@ def edit_piece(piece_id):
         db.session.execute(text('CALL UpdatePieceName(:id, :name)'), {'id': piece_id, 'name': piece.PieceName})
         db.session.execute(text('CALL UpdatePieceProfile(:id, :profile)'), {'id': piece_id, 'profile': piece.PieceProfile})
 
-        # Handle uploaded image
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = "tmp." + secure_filename(file.filename)
@@ -371,7 +369,7 @@ def edit_piece(piece_id):
             piece.PiecePic = file_path
 
         db.session.commit()
-        flash('Piece information updated.')
+        flash('作品信息已更新。')
         return redirect(url_for('piece_details', piece_id=piece_id))
 
     return render_template('edit_piece.html', piece=piece, current_user=get_user_info())
@@ -379,9 +377,8 @@ def edit_piece(piece_id):
 
 @app.route('/piece/delete/<int:piece_id>', methods=['POST'])
 def delete_piece(piece_id):
-    # Ensure user is logged in and is an admin
     if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to delete a piece.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     try:
@@ -430,7 +427,6 @@ def roles():
         # 如果用户是 AdminUser 的实例，则设置 is_admin 为 True
         if user is not None:
             is_admin = user.AdminIdentify
-        print(is_admin)
 
     return render_template('roles.html', roles=roles.items, is_admin=is_admin, current_user=get_user_info())
 
@@ -449,7 +445,7 @@ def role_details(role_id):
 def edit_role(role_id):
     # 确保用户已登录且是管理员
     if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to edit a role.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     role = Role.query.get_or_404(role_id)
@@ -489,9 +485,8 @@ def edit_role(role_id):
 
 @app.route('/role/delete/<int:role_id>', methods=['POST'])
 def delete_role(role_id):
-    # Ensure user is logged in and is an admin
     if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
-        flash('You must be an admin to delete a piece.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     try:
@@ -522,7 +517,7 @@ def new_role():
 
     user = AdminUser.query.get(session['user_id'])
     if user is None or user.AdminIdentify is None:
-        flash('You must be an admin to view this page.')
+        flash('非管理员用户')
         return redirect(url_for('roles'))
 
     if request.method == 'POST':
@@ -627,7 +622,7 @@ def edit_tool(tool_id):
             tool.ToolPic = file_path
 
         db.session.commit()
-        flash('工具信息已更新。')
+        flash('道具信息已更新。')
         return redirect(url_for('tool_details', tool_id=tool_id))
 
     # 如果是GET请求，则显示编辑表单
@@ -636,9 +631,8 @@ def edit_tool(tool_id):
 
 @app.route('/tool/delete/<int:tool_id>', methods=['POST'])
 def delete_tool(tool_id):
-    # Ensure user is logged in and is an admin
     if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
-        flash('You must be an admin to delete a piece.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     try:
@@ -669,7 +663,7 @@ def new_tool():
 
     user = AdminUser.query.get(session['user_id'])
     if user is None or user.AdminIdentify is None:
-        flash('You must be an admin to view this page.')
+        flash('非管理员用户')
         return redirect(url_for('home'))
 
     if request.method == 'POST':
@@ -803,7 +797,6 @@ def favorites():
     PER_PAGE = 35
     favorites = db.session.query(Piece, Save).join(Save, Piece.PieceID == Save.PieceID).filter(
         Save.UserID == user_id).paginate(page=page_num, per_page=PER_PAGE)
-    # favorites = Save.query.filter_by(UserID=user_id).paginate(page=page_num, per_page=PER_PAGE)
 
     favorites_list = [{
         'piece_id': piece.PieceID,
@@ -840,7 +833,7 @@ def remove_from_favorites(piece_id):
 @app.route('/rolelink', methods=['GET', 'POST'])
 def rolelink():
     if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to view this page.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     pieces = Piece.query.all()
@@ -860,8 +853,8 @@ def rolelink():
 
 @app.route('/toollink', methods=['GET', 'POST'])
 def toollink():
-    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to view this page.')
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     pieces = Piece.query.all()
@@ -881,8 +874,8 @@ def toollink():
 
 @app.route('/admin')
 def user_remarks():
-    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to view this page.')
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     sql = text('SELECT * FROM `user_remarks_view`')
@@ -925,6 +918,65 @@ def unlinked_tools(piece_id):
 
     tools_data = [{'ToolID': tool.ToolID, 'ToolName': tool.ToolName} for tool in tools]
     return jsonify(tools_data)
+
+
+@app.route('/rolelink/delete', methods=['GET', 'POST'])
+def delete_rolelink():
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
+        flash('You must be an admin to view this page.')
+        return redirect(url_for('login'))
+
+    pieces = Piece.query.all()
+    roles = []
+    selected_piece_id = None
+
+    if request.method == 'POST':
+        selected_piece_id = request.form.get('piece_id')
+        if selected_piece_id:
+            roles = db.session.query(Role).join(RoleLink, Role.RoleID == RoleLink.RoleID).filter(
+                RoleLink.PieceID == selected_piece_id).all()
+
+        role_id = request.form.get('role_id')
+        if role_id:
+            rolelink = RoleLink.query.filter_by(PieceID=selected_piece_id, RoleID=role_id).first()
+            if rolelink:
+                db.session.delete(rolelink)
+                db.session.commit()
+                flash('角色关联删除成功')
+                return redirect(url_for('delete_rolelink'))
+
+    return render_template('delete_rolelink.html', pieces=pieces, roles=roles, selected_piece_id=selected_piece_id,
+                           current_user=get_user_info())
+
+
+@app.route('/toollink/delete', methods=['GET', 'POST'])
+def delete_toollink():
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+        flash('You must be an admin to view this page.')
+        return redirect(url_for('login'))
+
+    pieces = Piece.query.all()
+    tools = []
+    selected_piece_id = None
+
+    if request.method == 'POST':
+        selected_piece_id = request.form.get('piece_id')
+        if selected_piece_id:
+            tools = db.session.query(Tool).join(ToolLink, Tool.ToolID == ToolLink.ToolID).filter(
+                ToolLink.PieceID == selected_piece_id).all()
+
+        tool_id = request.form.get('tool_id')
+        if tool_id:
+            toollink = ToolLink.query.filter_by(PieceID=selected_piece_id, ToolID=tool_id).first()
+            if toollink:
+                db.session.delete(toollink)
+                db.session.commit()
+                flash('道具关联删除成功')
+                return redirect(url_for('delete_toollink'))
+
+    return render_template('delete_toollink.html', pieces=pieces, tools=tools, selected_piece_id=selected_piece_id,
+                           current_user=get_user_info())
+
 
 
 if __name__ == "__main__":

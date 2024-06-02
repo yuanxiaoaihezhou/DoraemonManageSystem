@@ -18,10 +18,24 @@
     <div class="forum">
         <h2>{{ forum.forum_name }}</h2>
         {% for remark in forum.latest_remarks %}
-        <p style="margin-left: 20px;">{{ remark.username }}：{{ remark.remark_content }}</p>
+        <p style="margin-left: 20px;">{{ remark.username }}：{{ remark.remark_content }} <small class="utc-time">{{ remark.remark_time }}</small></p>
         {% endfor %}
         <a href="/forum/{{ forum.forum_id }}">read more</a>
     </div>
     {% endfor %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 获取所有带有 class 'utc-time' 的元素
+        var timeElements = document.querySelectorAll('.utc-time');
+
+        // 遍历每个元素，转换 UTC 时间为本地时间
+        timeElements.forEach(function(element) {
+            var utcTime = element.textContent.trim();
+            var localTime = new Date(utcTime + ' UTC');
+            element.textContent = localTime.toLocaleString();
+        });
+    });
+</script>
 {% endblock %}
