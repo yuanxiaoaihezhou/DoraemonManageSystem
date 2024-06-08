@@ -199,6 +199,7 @@ def login():
 
         # 查找用户
         user = User.query.filter_by(UserName=username).first()
+        # SELECT * FROM User WHERE UserName = 'username' LIMIT 1;
 
         # 检查用户是否存在并且密码是否正确
         if user and check_password_hash(user.UserPassword, password):
@@ -222,7 +223,9 @@ def home():
     # 获取当前登录用户的信息（如果已登录），并检查用户是否存在
     current_user_info = None
     if 'user_id' in session:
-        user = User.query.get(session['user_id'])
+        user = User.query.get_or_404(session['user_id'])
+        # SELECT * FROM User WHERE id = session['user_id'] LIMIT 1;
+
         if user is not None:  # 添加此检查以确认用户存在
             current_user_info = {
                 'name': user.UserName,
@@ -233,6 +236,7 @@ def home():
 
     # 查询最新添加的5个作品、角色、道具和发言
     latest_pieces = Piece.query.order_by(Piece.PieceID.desc()).limit(5).all()
+    # SELECT * FROM Piece ORDER BY PieceID DESC LIMIT 5;
     latest_roles = Role.query.order_by(Role.RoleID.desc()).limit(5).all()
     latest_tools = Tool.query.order_by(Tool.ToolID.desc()).limit(5).all()
     latest_remarks = Remark.query.order_by(Remark.RemarkID.desc()).limit(5).all()
@@ -256,11 +260,15 @@ def pieces():
     page_num = int(request.args.get('page', 1))
     PER_PAGE = 35
     pieces = Piece.query.order_by(Piece.PieceID).paginate(page=page_num, per_page=PER_PAGE)
+    # SELECT * FROM Piece ORDER BY PieceID ASC LIMIT PER_PAGE OFFSET (page_num - 1) * PER_PAGE;
+    # 跳过前(page_num - 1) * PER_PAGE条记录，以实现分页
 
     # 判断当前用户是否管理员
     is_admin = False
     if 'user_id' in session:
-        user = AdminUser.query.get(session['user_id'])
+        user = AdminUser.query.get_or_404(session['user_id'])
+        # SELECT * FROM AdminUser WHERE id = session['user_id'] LIMIT 1;
+
         # 如果用户是 AdminUser 的实例，则设置 is_admin 为 True
         if user is not None:
             is_admin = user.AdminIdentify
@@ -279,6 +287,10 @@ def piece_details(piece_id):
 
     # 获取关联的角色和道具
     roles = db.session.query(Role).join(RoleLink, Role.RoleID == RoleLink.RoleID).filter(RoleLink.PieceID == piece_id).all()
+    # SELECT Role.*
+    # FROM Role
+    # JOIN RoleLink ON Role.RoleID = RoleLink.RoleID
+    # WHERE RoleLink.PieceID = piece_id;
     tools = db.session.query(Tool).join(ToolLink, Tool.ToolID == ToolLink.ToolID).filter(ToolLink.PieceID == piece_id).all()
 
     return render_template('piece_details.html', piece=piece, roles=roles, tools=tools, current_user=get_user_info())
@@ -388,13 +400,16 @@ def delete_piece(piece_id):
         with db.session.begin_nested():
             # 删除与作品相关的角色关联、道具关联、收藏、论坛和发言
             RoleLink.query.filter_by(PieceID=piece_id).delete()
+            # DELETE FROM RoleLink WHERE PieceID = piece_id;
             ToolLink.query.filter_by(PieceID=piece_id).delete()
             Save.query.filter_by(PieceID=piece_id).delete()
 
             # 删除与作品相关的论坛及其发言
             forums = Forum.query.filter_by(ForumPieceID=piece_id).all()
+            # SELECT * FROM Forum WHERE ForumPieceID = piece_id;
             for forum in forums:
                 Remark.query.filter_by(ForumID=forum.ForumID).delete()
+                # DELETE FROM Remark WHERE ForumID = forum.ForumID;
                 db.session.delete(forum)
 
             # 删除作品
@@ -419,6 +434,7 @@ def roles():
     page_num = int(request.args.get('page', 1))
     PER_PAGE = 35
     roles = Role.query.order_by(Role.RoleID).paginate(page=page_num, per_page=PER_PAGE)
+    # SELECT * FROM Role ORDER BY RoleID LIMIT PER_PAGE OFFSET (page_num - 1) * PER_PAGE;
 
     # 判断当前用户是否管理员
     is_admin = False
@@ -438,6 +454,8 @@ def role_details(role_id):
         return redirect(url_for('login'))
 
     role = Role.query.get_or_404(role_id)
+    # SELECT * FROM Role WHERE RoleID = role_id;
+
     return render_template('role_details.html', role=role, current_user=get_user_info())
 
 
@@ -712,6 +730,12 @@ def forums():
         # 联合查询 Remark 和 User 表，以获取发言及其发言人的用户名
         remarks = db.session.query(Remark, User.UserName).join(User, Remark.UserID == User.UserID).filter(
             Remark.ForumID == forum.ForumID).order_by(Remark.RemarkID.desc()).limit(2).all()
+        # SELECT Remark.*, User.UserName
+        # FROM Remark
+        # JOIN User ON Remark.UserID = User.UserID
+        # WHERE Remark.ForumID = forum.ForumID
+        # ORDER BY Remark.RemarkID DESC
+        # LIMIT 2;
 
         # 将查询结果处理成字典列表，包含发言信息和用户名
         remarks_with_usernames = [{
@@ -754,6 +778,11 @@ def forum_details(forum_id):
     # 联合查询，以获取发言及其用户的用户名
     remarks = db.session.query(Remark, User.UserName).join(User, Remark.UserID == User.UserID).filter(
         Remark.ForumID == forum_id).order_by(Remark.RemarkID.desc()).all()
+    # SELECT Remark.*, User.UserName
+    # FROM Remark
+    # JOIN User ON Remark.UserID = User.UserID
+    # WHERE Remark.ForumID = forum_id
+    # ORDER BY Remark.RemarkID DESC;
 
     # 将查询结果处理成字典列表，包含发言信息和用户名
     remarks_with_usernames = [{
@@ -775,6 +804,8 @@ def add_to_favorites(piece_id):
 
     user_id = session['user_id']
     existing_save = Save.query.filter_by(UserID=user_id, PieceID=piece_id).first()
+    # SELECT * FROM Save WHERE UserID = user_id AND PieceID = piece_id LIMIT 1;
+
     if existing_save:
         flash('您已经收藏过这个作品了。')
     else:
@@ -797,6 +828,11 @@ def favorites():
     PER_PAGE = 35
     favorites = db.session.query(Piece, Save).join(Save, Piece.PieceID == Save.PieceID).filter(
         Save.UserID == user_id).paginate(page=page_num, per_page=PER_PAGE)
+    # SELECT Piece.*, Save.*
+    # FROM Piece
+    # JOIN Save ON Piece.PieceID = Save.PieceID
+    # WHERE Save.UserID = user_id
+    # LIMIT PER_PAGE OFFSET (page_num - 1) * PER_PAGE;
 
     favorites_list = [{
         'piece_id': piece.PieceID,
@@ -832,7 +868,7 @@ def remove_from_favorites(piece_id):
 
 @app.route('/rolelink', methods=['GET', 'POST'])
 def rolelink():
-    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -903,6 +939,10 @@ def unlinked_roles(piece_id):
 
     roles = Role.query.outerjoin(RoleLink, (Role.RoleID == RoleLink.RoleID) & (RoleLink.PieceID == piece_id))\
                       .filter(RoleLink.PieceID == None).all()
+    # SELECT Role.*
+    # FROM Role
+    # LEFT OUTER JOIN RoleLink ON Role.RoleID = RoleLink.RoleID AND RoleLink.PieceID = piece_id
+    # WHERE RoleLink.PieceID IS NULL;
 
     roles_data = [{'RoleID': role.RoleID, 'RoleName': role.RoleName} for role in roles]
     return jsonify(roles_data)
@@ -915,6 +955,10 @@ def unlinked_tools(piece_id):
 
     tools = Tool.query.outerjoin(ToolLink, (Tool.ToolID == ToolLink.ToolID) & (ToolLink.PieceID == piece_id))\
                       .filter(ToolLink.PieceID == None).all()
+    # SELECT Tool.*
+    # FROM Tool
+    # LEFT OUTER JOIN ToolLink ON Tool.ToolID = ToolLink.ToolID AND ToolLink.PieceID = piece_id
+    # WHERE ToolLink.PieceID IS NULL;
 
     tools_data = [{'ToolID': tool.ToolID, 'ToolName': tool.ToolName} for tool in tools]
     return jsonify(tools_data)
@@ -935,6 +979,10 @@ def delete_rolelink():
         if selected_piece_id:
             roles = db.session.query(Role).join(RoleLink, Role.RoleID == RoleLink.RoleID).filter(
                 RoleLink.PieceID == selected_piece_id).all()
+            # SELECT Role.*
+            # FROM Role
+            # JOIN RoleLink ON Role.RoleID = RoleLink.RoleID
+            # WHERE RoleLink.PieceID = selected_piece_id;
 
         role_id = request.form.get('role_id')
         if role_id:
@@ -964,6 +1012,10 @@ def delete_toollink():
         if selected_piece_id:
             tools = db.session.query(Tool).join(ToolLink, Tool.ToolID == ToolLink.ToolID).filter(
                 ToolLink.PieceID == selected_piece_id).all()
+            # SELECT Tool.*
+            # FROM Tool
+            # JOIN ToolLink ON Tool.ToolID = ToolLink.ToolID
+            # WHERE ToolLink.PieceID = selected_piece_id;
 
         tool_id = request.form.get('tool_id')
         if tool_id:

@@ -17,23 +17,27 @@ DELIMITER ;
 
 START TRANSACTION;
 
--- 删除与作品相关的角色关联
+-- 锁定与作品相关的角色关联
+SELECT * FROM RoleLink WHERE PieceID = :piece_id FOR UPDATE;
 DELETE FROM RoleLink WHERE PieceID = :piece_id;
 
--- 删除与作品相关的道具关联
+-- 锁定与作品相关的道具关联
+SELECT * FROM ToolLink WHERE PieceID = :piece_id FOR UPDATE;
 DELETE FROM ToolLink WHERE PieceID = :piece_id;
 
--- 删除与作品相关的收藏
+-- 锁定与作品相关的收藏
+SELECT * FROM Save WHERE PieceID = :piece_id FOR UPDATE;
 DELETE FROM Save WHERE PieceID = :piece_id;
 
--- 删除与作品相关的论坛及其发言
-DELETE Remark FROM Remark
-INNER JOIN Forum ON Remark.ForumID = Forum.ForumID
-WHERE Forum.ForumPieceID = :piece_id;
+-- 锁定与作品相关的论坛及其发言
+SELECT * FROM Remark INNER JOIN Forum ON Remark.ForumID = Forum.ForumID WHERE Forum.ForumPieceID = :piece_id FOR UPDATE;
+DELETE Remark FROM Remark INNER JOIN Forum ON Remark.ForumID = Forum.ForumID WHERE Forum.ForumPieceID = :piece_id;
 
+SELECT * FROM Forum WHERE ForumPieceID = :piece_id FOR UPDATE;
 DELETE FROM Forum WHERE ForumPieceID = :piece_id;
 
--- 删除作品
+-- 锁定作品
+SELECT * FROM Piece WHERE PieceID = :piece_id FOR UPDATE;
 DELETE FROM Piece WHERE PieceID = :piece_id;
 
 -- 如果没有发生错误，提交事务
