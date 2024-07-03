@@ -164,7 +164,7 @@ def register():
                     destination_filename = f"{user_id}.{file_extension}"
                     file_path = 'pic/user/' + destination_filename
                     img = Image.open(file.stream)
-                    img = img.resize((100,100), Image.LANCZOS)
+                    img = img.resize((100, 100), Image.LANCZOS)
                     img.save('./static/' + file_path)
 
                     # 更新用户头像路径
@@ -286,25 +286,25 @@ def piece_details(piece_id):
     piece = Piece.query.get_or_404(piece_id)
 
     # 获取关联的角色和道具
-    roles = db.session.query(Role).join(RoleLink, Role.RoleID == RoleLink.RoleID).filter(RoleLink.PieceID == piece_id).all()
+    roles = (db.session.query(Role)
+             .join(RoleLink, Role.RoleID == RoleLink.RoleID)
+             .filter(RoleLink.PieceID == piece_id).all())
     # SELECT Role.*
     # FROM Role
     # JOIN RoleLink ON Role.RoleID = RoleLink.RoleID
     # WHERE RoleLink.PieceID = piece_id;
-    tools = db.session.query(Tool).join(ToolLink, Tool.ToolID == ToolLink.ToolID).filter(ToolLink.PieceID == piece_id).all()
+    tools = (db.session.query(Tool)
+             .join(ToolLink, Tool.ToolID == ToolLink.ToolID)
+             .filter(ToolLink.PieceID == piece_id).all())
 
     return render_template('piece_details.html', piece=piece, roles=roles, tools=tools, current_user=get_user_info())
 
 
 @app.route('/new_piece', methods=['GET', 'POST'])
 def new_piece():
-    if 'user_id' not in session:
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+        flash('非管理员用户')
         return redirect(url_for('login'))
-
-    user = AdminUser.query.get(session['user_id'])
-    if user is None or user.AdminIdentify is None:
-        flash('You must be an admin to view this page.')
-        return redirect(url_for('home'))
 
     if request.method == 'POST':
         piece_name = request.form['piece_name']
@@ -315,7 +315,7 @@ def new_piece():
         piece_link = request.form['piece_link']
 
         new_piece = Piece(PieceName=piece_name, PieceType=piece_type, PieceProfile=piece_profile,
-                          PieceAuthor=piece_author, PieceOS=piece_os, PieceLink = piece_link)
+                          PieceAuthor=piece_author, PieceOS=piece_os, PieceLink=piece_link)
         db.session.add(new_piece)
         db.session.commit()
 
@@ -341,7 +341,9 @@ def new_piece():
             db.session.rollback()
             flash('上传的文件类型无效或者没有选定文件')
 
-        new_forum = Forum(ForumPieceID=new_piece.PieceID, ForumName=new_piece.PieceName, ForumProfile=new_piece.PieceProfile)
+        new_forum = Forum(ForumPieceID=new_piece.PieceID,
+                          ForumName=new_piece.PieceName,
+                          ForumProfile=new_piece.PieceProfile)
         db.session.add(new_forum)
         db.session.commit()
         flash('新作品创建成功')
@@ -367,7 +369,8 @@ def edit_piece(piece_id):
         piece.PieceLink = request.form['piece_link']
 
         db.session.execute(text('CALL UpdatePieceName(:id, :name)'), {'id': piece_id, 'name': piece.PieceName})
-        db.session.execute(text('CALL UpdatePieceProfile(:id, :profile)'), {'id': piece_id, 'profile': piece.PieceProfile})
+        db.session.execute(text('CALL UpdatePieceProfile(:id, :profile)'),
+                           {'id': piece_id, 'profile': piece.PieceProfile})
 
         file = request.files['file']
         if file and allowed_file(file.filename):
@@ -501,6 +504,7 @@ def edit_role(role_id):
     # 如果是GET请求，则显示编辑表单
     return render_template('edit_role.html', role=role, current_user=get_user_info())
 
+
 @app.route('/role/delete/<int:role_id>', methods=['POST'])
 def delete_role(role_id):
     if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
@@ -530,13 +534,9 @@ def delete_role(role_id):
 
 @app.route('/new_role', methods=['GET', 'POST'])
 def new_role():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    user = AdminUser.query.get(session['user_id'])
-    if user is None or user.AdminIdentify is None:
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
         flash('非管理员用户')
-        return redirect(url_for('roles'))
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         role_name = request.form['role_name']
@@ -676,13 +676,9 @@ def delete_tool(tool_id):
 
 @app.route('/new_tool', methods=['GET', 'POST'])
 def new_tool():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    user = AdminUser.query.get(session['user_id'])
-    if user is None or user.AdminIdentify is None:
+    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
         flash('非管理员用户')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         tool_name = request.form['tool_name']
@@ -938,7 +934,7 @@ def unlinked_roles(piece_id):
         return jsonify([])
 
     roles = Role.query.outerjoin(RoleLink, (Role.RoleID == RoleLink.RoleID) & (RoleLink.PieceID == piece_id))\
-                      .filter(RoleLink.PieceID == None).all()
+                      .filter(RoleLink.PieceID == None).all() # 不能改
     # SELECT Role.*
     # FROM Role
     # LEFT OUTER JOIN RoleLink ON Role.RoleID = RoleLink.RoleID AND RoleLink.PieceID = piece_id
@@ -954,7 +950,7 @@ def unlinked_tools(piece_id):
         return jsonify([])
 
     tools = Tool.query.outerjoin(ToolLink, (Tool.ToolID == ToolLink.ToolID) & (ToolLink.PieceID == piece_id))\
-                      .filter(ToolLink.PieceID == None).all()
+                      .filter(ToolLink.PieceID == None).all() # 不能改
     # SELECT Tool.*
     # FROM Tool
     # LEFT OUTER JOIN ToolLink ON Tool.ToolID = ToolLink.ToolID AND ToolLink.PieceID = piece_id
@@ -1028,7 +1024,6 @@ def delete_toollink():
 
     return render_template('delete_toollink.html', pieces=pieces, tools=tools, selected_piece_id=selected_piece_id,
                            current_user=get_user_info())
-
 
 
 if __name__ == "__main__":
