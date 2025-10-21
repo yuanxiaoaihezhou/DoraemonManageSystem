@@ -1,27 +1,78 @@
 {% extends "base.html" %}
 {% block title %}讨论版{% endblock %}
 
-{% block content %}
+{% block head %}
 <style>
     .forum {
-        border: 2px solid #000; /* 黑色边框 */
-        border-radius: 20px; /* 设置边框圆角的曲率，使四个角变得圆滑 */
-        padding: 20px; /* 内边距，使内容与边框有些距离 */
-        margin: 10px 0; /* 外边距，使不同的 remark 之间有些间隔 */
-        text-align: left; /* 文本左对齐 */
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 可选：添加一些阴影效果，让边框更有层次感 */
-        background-color: #f9f9f9; /* 可选：设置背景颜色 */
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        text-align: left;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background-color: #fff;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .forum:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .forum h2 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+    }
+    .forum-remarks {
+        margin: 1rem 0;
+        padding-left: 1rem;
+    }
+    .forum-remark {
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #3498db;
+    }
+    .remark-username {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .remark-time {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    .forum-link {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+    .forum-link:hover {
+        background-color: #2980b9;
     }
 </style>
+{% endblock %}
+
+{% block content %}
 <h1>论坛列表</h1>
 <div class="forums">
     {% for forum in forums %}
     <div class="forum">
         <h2>{{ forum.forum_name }}</h2>
-        {% for remark in forum.latest_remarks %}
-        <p style="margin-left: 20px;">{{ remark.username }}：{{ remark.remark_content }} <small class="utc-time">{{ remark.remark_time }}</small></p>
-        {% endfor %}
-        <a href="/forum/{{ forum.forum_id }}">read more</a>
+        <div class="forum-remarks">
+            {% for remark in forum.latest_remarks %}
+            <div class="forum-remark">
+                <span class="remark-username">{{ remark.username }}</span>：{{ remark.remark_content }} 
+                <small class="remark-time utc-time">{{ remark.remark_time }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="/forum/{{ forum.forum_id }}" class="forum-link">查看详情</a>
     </div>
     {% endfor %}
 </div>
