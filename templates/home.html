@@ -5,29 +5,59 @@
 {% block content %}
 <style>
     .flex-container {
-        display: flex;
-        flex-wrap: wrap;
-        list-style: none; /* 去掉小黑点 */
-        justify-content: space-between;
-        gap: 10px; /* 调整间距 */
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
     }
 
     .flex-item {
-        flex: 1 1 calc(20% - 10px); /* 5个项目，每个占20%的宽度，减去间距 */
-        box-sizing: border-box;
-        max-width: 40%; /* 限制最大显示比例为60% */
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .flex-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
     .flex-item img {
         width: 100%;
-        height: auto;
+        height: 180px;
         object-fit: cover;
+        display: block;
     }
 
     .flex-item a {
         display: block;
         text-align: center;
-        margin-top: 5px;
+        padding: 0.8rem;
+        color: #2c3e50;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s;
+    }
+
+    .flex-item a:hover {
+        color: #3498db;
+    }
+
+    .remark-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .remark-list li {
+        padding: 0.8rem;
+        margin-bottom: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #3498db;
     }
 </style>
 
@@ -60,11 +90,10 @@
         {% endfor %}
     </ul>
     <h2>最新发言</h2>
-    <ul>
+    <ul class="remark-list">
         {% for remark in latest_remarks %}
             <li>{{ remark.RemarkContent }}</li>
         {% endfor %}
     </ul>
-    <!-- 其他section同理添加 -->
 </section>
 {% endblock %}

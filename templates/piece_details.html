@@ -1,23 +1,101 @@
 {% extends 'base.html' %}
 
+{% block head %}
+<style>
+    .piece-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .piece-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .piece-title {
+        color: #2c3e50;
+        margin: 0;
+    }
+    .favorite-form, .delete-form, .edit-form {
+        margin: 0;
+    }
+    .piece-image {
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        margin: 1rem 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .piece-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    .piece-info p {
+        margin: 0.8rem 0;
+        line-height: 1.6;
+    }
+    .related-items {
+        margin-top: 2rem;
+    }
+    .related-items h3 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .related-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        list-style: none;
+        padding: 0;
+    }
+    .related-list li {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+    .related-list li:hover {
+        transform: translateY(-3px);
+    }
+    .related-list img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+    }
+    .related-list a {
+        display: block;
+        text-align: center;
+        padding: 0.8rem;
+        color: #2c3e50;
+        text-decoration: none;
+    }
+    .btn-success {
+        background-color: #27ae60;
+    }
+    .btn-success:hover {
+        background-color: #229954;
+    }
+    .btn-primary {
+        background-color: #3498db;
+    }
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <style>
-        .piece-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .piece-actions {
-            display: flex;
-            align-items: center;
-        }
-        .piece-title {
-            margin-right: 20px; /* 根据需要调整 */
-        }
-        .favorite-form, .delete-form, .edit-form {
-            margin: 0 10px 0 0; /* 移除表单的默认外边距并添加右边距 */
-        }
-    </style>
     <div class="piece-header">
         <h1 class="piece-title">{{ piece.PieceName }}</h1>
         <div class="piece-actions">
@@ -34,38 +112,41 @@
             {% endif %}
         </div>
     </div>
-    <img src="{{ url_for('static', filename=piece.PiecePic) }}" alt="{{ piece.PieceName }}" style="width: 60%; height: auto; object-fit: cover;">
-    <p>作品简介: {{ piece.PieceProfile }}</p>
-    <p>作品类型: {{ piece.PieceType }}</p>
-    <p>作品作者: {{ piece.PieceAuthor }}</p>
-    <p>作品链接: <a href="{{ piece.PieceLink }}" target="_blank">{{ piece.PieceName }}</a></p>
-    <p>作品创作类型:
-        {% if piece.PieceOS %}
-            原作
-        {% else %}
-            二创
-        {% endif %}
-    </p>
+    <img src="{{ url_for('static', filename=piece.PiecePic) }}" alt="{{ piece.PieceName }}" class="piece-image">
+    
+    <div class="piece-info">
+        <p><strong>作品简介:</strong> {{ piece.PieceProfile }}</p>
+        <p><strong>作品类型:</strong> {{ piece.PieceType }}</p>
+        <p><strong>作品作者:</strong> {{ piece.PieceAuthor }}</p>
+        <p><strong>作品链接:</strong> <a href="{{ piece.PieceLink }}" target="_blank">{{ piece.PieceName }}</a></p>
+        <p><strong>作品创作类型:</strong>
+            {% if piece.PieceOS %}
+                原作
+            {% else %}
+                二创
+            {% endif %}
+        </p>
+    </div>
 
-    <!-- 显示关联的角色 -->
-    <h3>关联的角色</h3>
-    <ul>
-        {% for role in roles %}
-            <li>
-                <img src="{{ url_for('static', filename=role.RolePic) }}" alt="{{ role.RoleName }}" style="width: 50px; height: auto; object-fit: cover;">
-                <a href="{{ url_for('role_details', role_id=role.RoleID) }}">{{ role.RoleName }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="related-items">
+        <h3>关联的角色</h3>
+        <ul class="related-list">
+            {% for role in roles %}
+                <li>
+                    <img src="{{ url_for('static', filename=role.RolePic) }}" alt="{{ role.RoleName }}">
+                    <a href="{{ url_for('role_details', role_id=role.RoleID) }}">{{ role.RoleName }}</a>
+                </li>
+            {% endfor %}
+        </ul>
 
-    <!-- 显示关联的道具 -->
-    <h3>关联的道具</h3>
-    <ul>
-        {% for tool in tools %}
-            <li>
-                <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}" style="width: 50px; height: auto; object-fit: cover;">
-                <a href="{{ url_for('tool_details', tool_id=tool.ToolID) }}">{{ tool.ToolName }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+        <h3>关联的道具</h3>
+        <ul class="related-list">
+            {% for tool in tools %}
+                <li>
+                    <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}">
+                    <a href="{{ url_for('tool_details', tool_id=tool.ToolID) }}">{{ tool.ToolName }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

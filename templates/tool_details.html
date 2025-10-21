@@ -1,13 +1,57 @@
 {% extends 'base.html' %}
 
+{% block head %}
+<style>
+    .detail-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .detail-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .detail-image {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        margin: 1rem 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .detail-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    .detail-info p {
+        margin: 0.8rem 0;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <h1>{{ tool.ToolName }}</h1>
-    <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}" style="width: 60%; height: auto; object-fit: cover;">
-    <p>道具简介: {{ tool.ToolProfile }}</p>
-    {% if current_user.is_admin %}
-        <a href="{{ url_for('edit_tool', tool_id=tool.ToolID) }}" class="btn btn-primary">编辑</a>
-        <form action="{{ url_for('delete_tool', tool_id=tool.ToolID) }}" method="post" style="display: inline;">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个道具吗？')">删除</button>
-    {% endif %}
-    <!-- 添加更多角色属性的展示 -->
+    <div class="detail-header">
+        <h1>{{ tool.ToolName }}</h1>
+        {% if current_user.is_admin %}
+        <div class="detail-actions">
+            <a href="{{ url_for('edit_tool', tool_id=tool.ToolID) }}" class="btn btn-primary">编辑</a>
+            <form action="{{ url_for('delete_tool', tool_id=tool.ToolID) }}" method="post" style="display: inline; margin: 0;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个道具吗？')">删除</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    
+    <img src="{{ url_for('static', filename=tool.ToolPic) }}" alt="{{ tool.ToolName }}" class="detail-image">
+    
+    <div class="detail-info">
+        <p><strong>道具简介:</strong> {{ tool.ToolProfile }}</p>
+    </div>
 {% endblock %}

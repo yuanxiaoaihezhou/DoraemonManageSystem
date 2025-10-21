@@ -182,8 +182,6 @@ def register():
 
     except Exception as e:
         # 如果触发器抛出错误，回滚会话并显示错误消息
-        print("用户名已存在，请重新输入")
-        print(e)
         db.session.rollback()
         flash("用户名已存在，请重新输入")
         return redirect(url_for('register'))
@@ -206,10 +204,10 @@ def login():
             # 用户登录成功，设置会话
             session['user_id'] = user.UserID
             session['user_name'] = user.UserName
-            flash('Login successful.')
+            flash('登录成功。')
             return redirect(url_for('home'))  # 重定向到主页或其他页面
         else:
-            flash('Invalid username or password.')
+            flash('用户名或密码错误。')
 
     return render_template('login.html')
 
@@ -266,13 +264,12 @@ def pieces():
     # 判断当前用户是否管理员
     is_admin = False
     if 'user_id' in session:
-        user = AdminUser.query.get_or_404(session['user_id'])
+        user = AdminUser.query.get(session['user_id'])
         # SELECT * FROM AdminUser WHERE id = session['user_id'] LIMIT 1;
 
         # 如果用户是 AdminUser 的实例，则设置 is_admin 为 True
         if user is not None:
             is_admin = user.AdminIdentify
-        print(is_admin)
 
     return render_template('pieces.html', pieces=pieces.items, is_admin=is_admin, current_user=get_user_info())
 
@@ -302,7 +299,7 @@ def piece_details(piece_id):
 
 @app.route('/new_piece', methods=['GET', 'POST'])
 def new_piece():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -322,7 +319,6 @@ def new_piece():
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = "temp." + secure_filename(file.filename)
-            print(filename)
             if '.' in filename:
                 piece_id = new_piece.PieceID
                 file_extension = filename.rsplit('.', 1)[1].lower()
@@ -422,7 +418,6 @@ def delete_piece(piece_id):
         flash('作品删除成功。')
     except SQLAlchemyError as e:
         db.session.rollback()
-        print(f'删除作品时发生错误: {str(e)}')
         flash(f'删除作品时发生错误: {str(e)}')
 
     return redirect(url_for('pieces'))
@@ -507,7 +502,7 @@ def edit_role(role_id):
 
 @app.route('/role/delete/<int:role_id>', methods=['POST'])
 def delete_role(role_id):
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -526,7 +521,6 @@ def delete_role(role_id):
         flash('角色删除成功。')
     except SQLAlchemyError as e:
         db.session.rollback()
-        print(f'删除角色时发生错误: {str(e)}')
         flash(f'删除角色时发生错误: {str(e)}')
 
     return redirect(url_for('roles'))
@@ -534,7 +528,7 @@ def delete_role(role_id):
 
 @app.route('/new_role', methods=['GET', 'POST'])
 def new_role():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -556,12 +550,10 @@ def new_role():
         db.session.commit()
 
         file = request.files['file']
-        print(request.files)
         if file and allowed_file(file.filename):
             filename = "temp." + secure_filename(file.filename)
             if '.' in filename:
                 role_id = new_role.RoleID
-                print(role_id)
                 file_extension = filename.rsplit('.', 1)[1].lower()
                 destination_filename = f"{role_id}.{file_extension}"
                 file_path = 'pic/role/' + destination_filename
@@ -618,7 +610,7 @@ def tool_details(tool_id):
 def edit_tool(tool_id):
     # 确保用户已登录且是管理员
     if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to edit a tool.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     tool = Tool.query.get_or_404(tool_id)
@@ -649,7 +641,7 @@ def edit_tool(tool_id):
 
 @app.route('/tool/delete/<int:tool_id>', methods=['POST'])
 def delete_tool(tool_id):
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -668,7 +660,6 @@ def delete_tool(tool_id):
         flash('道具删除成功。')
     except SQLAlchemyError as e:
         db.session.rollback()
-        print(f'删除道具时发生错误: {str(e)}')
         flash(f'删除道具时发生错误: {str(e)}')
 
     return redirect(url_for('tools'))
@@ -676,7 +667,7 @@ def delete_tool(tool_id):
 
 @app.route('/new_tool', methods=['GET', 'POST'])
 def new_tool():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -766,10 +757,10 @@ def forum_details(forum_id):
                                 RemarkTime=datetime.utcnow())
             db.session.add(new_remark)
             db.session.commit()
-            flash('Your remark has been posted.')
+            flash('发言已发布。')
             return redirect(url_for('forum_details', forum_id=forum_id))
         else:
-            flash('Remark content cannot be empty.')
+            flash('发言内容不能为空。')
 
     # 联合查询，以获取发言及其用户的用户名
     remarks = db.session.query(Remark, User.UserName).join(User, Remark.UserID == User.UserID).filter(
@@ -864,7 +855,7 @@ def remove_from_favorites(piece_id):
 
 @app.route('/rolelink', methods=['GET', 'POST'])
 def rolelink():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -885,7 +876,7 @@ def rolelink():
 
 @app.route('/toollink', methods=['GET', 'POST'])
 def toollink():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -906,7 +897,7 @@ def toollink():
 
 @app.route('/admin')
 def user_remarks():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
         flash('非管理员用户')
         return redirect(url_for('login'))
 
@@ -963,7 +954,7 @@ def unlinked_tools(piece_id):
 @app.route('/rolelink/delete', methods=['GET', 'POST'])
 def delete_rolelink():
     if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
-        flash('You must be an admin to view this page.')
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     pieces = Piece.query.all()
@@ -995,8 +986,8 @@ def delete_rolelink():
 
 @app.route('/toollink/delete', methods=['GET', 'POST'])
 def delete_toollink():
-    if 'user_id' not in session or not AdminUser.query.get_or_404(session['user_id']).AdminIdentify:
-        flash('You must be an admin to view this page.')
+    if 'user_id' not in session or not AdminUser.query.get(session['user_id']).AdminIdentify:
+        flash('非管理员用户')
         return redirect(url_for('login'))
 
     pieces = Piece.query.all()
