@@ -1,58 +1,155 @@
 {% extends 'base.html' %}
+{% block title %}编辑角色{% endblock %}
+
+{% block head %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    .form-container h1 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="file"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        font-family: inherit;
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    .image-preview {
+        margin-top: 1rem;
+    }
+    .image-preview p {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #495057;
+    }
+    .image-preview img {
+        max-width: 400px;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    #newImagePreview {
+        display: none;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .form-actions button,
+    .form-actions a {
+        flex: 1;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    .btn-submit {
+        background-color: #3498db;
+        color: white;
+    }
+    .btn-submit:hover {
+        background-color: #2980b9;
+    }
+    .btn-cancel {
+        background-color: #95a5a6;
+        color: white;
+    }
+    .btn-cancel:hover {
+        background-color: #7f8c8d;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4">编辑角色信息</h1>
+<div class="form-container">
+    <h1>编辑角色信息</h1>
     <form method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="role_name" class="form-label">角色名称:</label>
-            <input type="text" class="form-control" name="role_name" id="role_name" value="{{ role.RoleName }}" required>
+        <div class="form-group">
+            <label for="role_name">角色名称:</label>
+            <input type="text" name="role_name" id="role_name" value="{{ role.RoleName }}" required>
         </div>
 
-        <div class="mb-3">
-            <label for="role_profile" class="form-label">角色简介:</label>
-            <textarea class="form-control" name="role_profile" id="role_profile" rows="3" required>{{ role.RoleProfile }}</textarea>
+        <div class="form-group">
+            <label for="role_profile">角色简介:</label>
+            <textarea name="role_profile" id="role_profile" rows="4" required>{{ role.RoleProfile }}</textarea>
         </div>
 
-        <div class="mb-3">
-            <label for="role_gender" class="form-label">性别:</label>
-            <select class="form-select" name="role_gender" id="role_gender" required>
+        <div class="form-group">
+            <label for="role_gender">性别:</label>
+            <select name="role_gender" id="role_gender" required>
                 <option value="male" {% if role.RoleGender %}selected{% endif %}>男</option>
                 <option value="female" {% if not role.RoleGender %}selected{% endif %}>女</option>
                 <option value="other">其他</option>
             </select>
         </div>
 
-        <div class="mb-3">
-            <label for="role_age" class="form-label">年龄:</label>
-            <input type="number" class="form-control" name="role_age" id="role_age" value="{{ role.RoleAge }}" required>
+        <div class="form-group">
+            <label for="role_age">年龄:</label>
+            <input type="number" name="role_age" id="role_age" value="{{ role.RoleAge }}" required>
         </div>
 
-        <div class="mb-3">
-            <label for="file" class="form-label">角色图片:</label>
-            <input type="file" class="form-control" name="file" id="file" onchange="previewImage(event)">
-            <div class="mt-3">
+        <div class="form-group">
+            <label for="file">角色图片:</label>
+            <input type="file" name="file" id="file" onchange="previewImage(event)">
+            <div class="image-preview">
                 <p>当前图片:</p>
-                <img src="{{ url_for('static', filename=role.RolePic) }}" alt="当前图片" class="img-thumbnail" id="currentImage" style="width: 60%; height: auto; object-fit: cover;">
+                <img src="{{ url_for('static', filename=role.RolePic) }}" alt="当前图片" id="currentImage">
             </div>
-            <div class="mt-3">
+            <div class="image-preview">
                 <p>新上传图片预览:</p>
-                <img id="newImagePreview" class="img-thumbnail" style="width: 60%; height: auto; object-fit: cover;">
+                <img id="newImagePreview">
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">提交</button>
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">提交</button>
+            <a href="{{ url_for('role_details', role_id=role.RoleID) }}" class="btn-cancel">取消</a>
+        </div>
     </form>
 </div>
 
 <script>
-    // JavaScript 函数用于在选择文件后预览图片
     function previewImage(event) {
         var reader = new FileReader();
         reader.onload = function(){
             var output = document.getElementById('newImagePreview');
             output.src = reader.result;
-            output.style.display = 'block'; // 显示新上传图片预览
+            output.style.display = 'block';
         };
         reader.readAsDataURL(event.target.files[0]);
     }

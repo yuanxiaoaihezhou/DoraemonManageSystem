@@ -113,6 +113,25 @@
         .btn-danger:hover {
             background-color: #c0392b;
         }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+                padding: 1rem;
+            }
+            aside {
+                order: -1;
+            }
+            header nav {
+                flex-wrap: wrap;
+            }
+            header nav a {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.9rem;
+            }
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
